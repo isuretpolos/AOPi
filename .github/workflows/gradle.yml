@@ -11,9 +11,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    permissions:
-      contents: read
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -31,41 +28,23 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Build project
-        run: ./gradlew clean lwjgl3:dist
+        run: ./gradlew clean build
 
-      - name: Prepare desktop package
+      - name: Prepare package
         shell: bash
         run: |
-          rm -rf package build-package.zip
+          rm -rf package
           mkdir -p package
 
-          if [ -d lwjgl3/build/libs ]; then
-            cp -r lwjgl3/build/libs package/libs
-          fi
+          cp lwjgl3/build/libs/*.jar package/
 
           if [ -d assets ]; then
-            cp -r assets package/assets
-          fi
-
-          if [ -f README.md ]; then
-            cp README.md package/
-          fi
-
-          if [ -f LICENSE ]; then
-            cp LICENSE package/
+            cp -r assets package/
           fi
 
           cat > package/run.sh <<'EOF'
           #!/usr/bin/env bash
-          set -euo pipefail
-
-          JAR=$(find "$(dirname "$0")/libs" -maxdepth 1 -type f -name "*.jar" | head -n 1)
-
-          if [ -z "${JAR:-}" ]; then
-            echo "No jar found in ./libs"
-            exit 1
-          fi
-
+          JAR=$(ls *.jar | head -n 1)
           java -jar "$JAR"
           EOF
 
@@ -73,29 +52,14 @@ jobs:
 
           cat > package/run.bat <<'EOF'
           @echo off
-          setlocal enabledelayedexpansion
-
-          set "JAR="
-          for %%f in ("%~dp0libs\*.jar") do (
-              set "JAR=%%f"
-              goto :found
+          for %%f in (*.jar) do (
+              java -jar "%%f"
+              goto :eof
           )
-
-          echo No jar found in .\libs
-          exit /b 1
-
-          :found
-          java -jar "%JAR%"
           EOF
 
-      - name: Create zip
-        shell: bash
-        run: |
-          cd package
-          zip -r ../build-package.zip .
-
-      - name: Upload zipped package
+      - name: Upload desktop package
         uses: actions/upload-artifact@v4
         with:
           name: desktop-package
-          path: build-package.zip
+          path: package
