@@ -1,4 +1,4 @@
-name: Gradle Build
+name: Build Desktop Zip
 
 on:
   push:
@@ -31,34 +31,20 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Build project
-        run: ./gradlew clean build
+        run: ./gradlew clean lwjgl3:dist
 
-      - name: Prepare package
+      - name: Prepare desktop package
         shell: bash
         run: |
+          rm -rf package build-package.zip
           mkdir -p package
 
-          echo "Collecting build outputs..."
-
-          find . -type f \( -name "*.jar" -o -name "*.war" -o -name "*.zip" -o -name "*.tar" -o -name "*.tar.gz" \) \
-            ! -name "*-sources.jar" \
-            ! -name "*-javadoc.jar" \
-            ! -path "*/.gradle/*" \
-            ! -path "*/wrapper/*" \
-            -exec cp --parents {} package/ \;
-
           if [ -d lwjgl3/build/libs ]; then
-            mkdir -p package/run
-            cp -r lwjgl3/build/libs package/run/
-          fi
-
-          if [ -d core/build/libs ]; then
-            mkdir -p package/run
-            cp -r core/build/libs package/run/
+            cp -r lwjgl3/build/libs package/libs
           fi
 
           if [ -d assets ]; then
-            cp -r assets package/
+            cp -r assets package/assets
           fi
 
           if [ -f README.md ]; then
@@ -69,6 +55,39 @@ jobs:
             cp LICENSE package/
           fi
 
+          cat > package/run.sh <<'EOF'
+          #!/usr/bin/env bash
+          set -euo pipefail
+
+          JAR=$(find "$(dirname "$0")/libs" -maxdepth 1 -type f -name "*.jar" | head -n 1)
+
+          if [ -z "${JAR:-}" ]; then
+            echo "No jar found in ./libs"
+            exit 1
+          fi
+
+          java -jar "$JAR"
+          EOF
+
+          chmod +x package/run.sh
+
+          cat > package/run.bat <<'EOF'
+          @echo off
+          setlocal enabledelayedexpansion
+
+          set "JAR="
+          for %%f in ("%~dp0libs\*.jar") do (
+              set "JAR=%%f"
+              goto :found
+          )
+
+          echo No jar found in .\libs
+          exit /b 1
+
+          :found
+          java -jar "%JAR%"
+          EOF
+
       - name: Create zip
         shell: bash
         run: |
@@ -78,5 +97,5 @@ jobs:
       - name: Upload zipped package
         uses: actions/upload-artifact@v4
         with:
-          name: build-package
+          name: desktop-package
           path: build-package.zip
