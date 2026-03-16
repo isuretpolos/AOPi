@@ -1,5 +1,6 @@
 package isuret.polos.aopi.lwjgl3;
 
+import com.badlogic.gdx.Graphics;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import isuret.polos.aopi.Main;
@@ -18,6 +19,14 @@ public class Lwjgl3Launcher {
     private static Lwjgl3ApplicationConfiguration getDefaultConfiguration() {
         Lwjgl3ApplicationConfiguration configuration = new Lwjgl3ApplicationConfiguration();
         configuration.setTitle("AetherOnePi");
+
+        // AntiAlias Samples - MSAA 8x (letzter Parameter = samples)
+        configuration.setBackBufferConfig(8, 8, 8, 8, 24, 8, 8);
+
+        Graphics.DisplayMode displayMode = Lwjgl3ApplicationConfiguration.getDisplayMode();
+        configuration.setFullscreenMode(displayMode);
+
+
         //// Vsync limits the frames per second to what your hardware can display, and helps eliminate
         //// screen tearing. This setting doesn't always work on Linux, so the line after is a safeguard.
         configuration.useVsync(true);
