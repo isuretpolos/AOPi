@@ -19,6 +19,10 @@ import java.util.List;
 
 /** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
 public class Main extends ApplicationAdapter {
+    private enum Mode {
+        DRAW, BROADCAST
+    }
+    private Mode selectedMode;
     private SpriteBatch batch;
     private Texture image;
     private ShapeRenderer shapeRenderer;
@@ -38,8 +42,8 @@ public class Main extends ApplicationAdapter {
             @Override
             public boolean keyDown(int keycode) {
                 System.out.println("Key pressed: " + keycode);
-                if (keycode == Input.Keys.NUM_1) {
-                    drawing = !drawing;
+                if (keycode >= 145 && keycode <= 153) {
+                    selectedMode = Mode.values()[keycode - 145];
                 }
                 if (keycode == Input.Keys.ESCAPE) {
                     Gdx.app.exit();
@@ -49,7 +53,7 @@ public class Main extends ApplicationAdapter {
 
             @Override
             public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-                if (button == Input.Buttons.LEFT) {
+                if (Mode.DRAW.equals(selectedMode) && button == Input.Buttons.LEFT) {
                     drawing = true;
                     touchDownX = screenX;
                     touchDownY = Gdx.graphics.getHeight() - screenY;
@@ -59,7 +63,7 @@ public class Main extends ApplicationAdapter {
 
             @Override
             public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-                if (button == Input.Buttons.LEFT) {
+                if (Mode.DRAW.equals(selectedMode) &&button == Input.Buttons.LEFT) {
                     drawing = false;
                     rectangles.add(new Rectangle(touchDownX, touchDownY, touchUpX, touchUpY));
                 }
@@ -94,10 +98,27 @@ public class Main extends ApplicationAdapter {
         float mouseY = screenHeight - Gdx.input.getY();
 
         batch.begin();
-        font.draw(batch, "[0]HIDE TOOLS [1]DRAW", 10, 10 + font.getXHeight());
+        int x = 10;
+        int i = 0;
+        for (Mode mode : Mode.values()) {
+            i++;
+            if (mode.equals(this.selectedMode)) {
+                font.setColor(1, 1, 1, 1);
+            } else {
+                font.setColor(0.5f, 0.5f, 0.5f, 1);
+            }
+            font.draw(batch, mode.name() + " [" + i + "]", x, 10 + font.getXHeight());
+            layout.setText(font, mode.name() + " [" + i + "]");
+            x += layout.width + 10;
+        }
+
         batch.end();
 
-        if (drawing) {
+        batch.begin();
+        //font.draw(batch, "MODE: " + selectedMode.g, 10, 10 + (font.getXHeight()*3));
+        batch.end();
+
+        if (Mode.DRAW.equals(selectedMode) && drawing) {
             shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
             shapeRenderer.setColor(1, 1, 1, 1); // rot
             touchUpX = mouseX - touchDownX;
