@@ -2,18 +2,18 @@ package isuret.polos.aopi.entities;
 
 public class Position {
 
-    private int x;
-    private int y;
+    private float x;
+    private float y;
 
-    public Position(int x, int y) {
+    public Position(float x, float y) {
         this.x = x;
         this.y = y;
     }
 
-    public int getX() {
+    public float getX() {
         return x;
     }
-    public int getY() {
+    public float getY() {
         return y;
     }
 }

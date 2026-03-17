@@ -6,7 +6,7 @@ public class Text extends Position {
     public int size;
     public int color;
 
-    public Text(String text, int x, int y, int size, int color) {
+    public Text(String text, float x, float y, int size, int color) {
         super(x, y);
         this.text = text;
         this.size = size;

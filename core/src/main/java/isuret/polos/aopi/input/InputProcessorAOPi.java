@@ -8,7 +8,9 @@ import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Rectangle;
 import isuret.polos.aopi.Main;
+import isuret.polos.aopi.data.Database;
 import isuret.polos.aopi.entities.Image;
+import isuret.polos.aopi.entities.Text;
 
 import java.awt.*;
 import java.awt.datatransfer.DataFlavor;
@@ -39,16 +41,10 @@ public class InputProcessorAOPi implements InputProcessor {
             }
         }
 
-        if (keycode >= 145 && keycode <= 153) {
-            try {
-                main.selectedMode = Main.Mode.values()[keycode - 145];
-                main.typedText = "";
-                return true;
-            } catch (Exception _) {}
-        }
-
         if (keycode == Input.Keys.BACKSPACE) {
-            main.typedText = main.typedText.substring(0, main.typedText.length() - 1);
+            if (!main.typedText.isEmpty()) {
+                main.typedText = main.typedText.substring(0, main.typedText.length() - 1);
+            }
             return true;
         }
 
@@ -88,12 +84,19 @@ public class InputProcessorAOPi implements InputProcessor {
 
     @Override
     public boolean keyUp(int keycode) {
+        if (keycode >= 145 && keycode <= 153) {
+            try {
+                main.selectedMode = Main.Mode.values()[keycode - 145];
+                main.typedText = "";
+                return true;
+            } catch (Exception _) {}
+        }
         return false;
     }
 
     @Override
     public boolean keyTyped(char character) {
-        if (Character.isLetterOrDigit(character)) {
+        if (main.selectedMode.equals(Main.Mode.TEXT) && Character.isLetterOrDigit(character)) {
             main.typedText += character;
         }
         return true;
@@ -103,8 +106,9 @@ public class InputProcessorAOPi implements InputProcessor {
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
         if (Main.Mode.DRAW.equals(main.selectedMode) && button == Input.Buttons.LEFT) {
             main.drawing = true;
-            main.touchDownX = screenX;
-            main.touchDownY = Gdx.graphics.getHeight() - screenY;
+            float[] mousePos = main.getMousePosition();
+            main.touchDownX = mousePos[0];
+            main.touchDownY = mousePos[1];
         }
         return true;
     }
@@ -114,6 +118,12 @@ public class InputProcessorAOPi implements InputProcessor {
         if (Main.Mode.DRAW.equals(main.selectedMode) &&button == Input.Buttons.LEFT) {
             main.drawing = false;
             main.rectangles.add(new Rectangle(main.touchDownX, main.touchDownY, main.touchUpX, main.touchUpY));
+        }
+        if (Main.Mode.TEXT.equals(main.selectedMode) && button == Input.Buttons.LEFT) {
+            float[] mousePos = main.getMousePosition();
+            main.texts.add(new Text(main.typedText, mousePos[0], mousePos[1] + 12, 12, 1));
+            Database.setValue("text-test",main.texts.get(main.texts.size()-1));
+            main.typedText = "";
         }
         if (main.imgPasted != null) {
             main.images.add(new Image(main.imgPasted, Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY()));
