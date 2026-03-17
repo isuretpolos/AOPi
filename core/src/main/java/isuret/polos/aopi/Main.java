@@ -32,7 +32,6 @@ public class Main extends ApplicationAdapter {
     }
     public Mode selectedMode;
     public SpriteBatch batch;
-    public Texture image;
     public ShapeRenderer shapeRenderer;
     public BitmapFont font;
     public GlyphLayout layout = new GlyphLayout();
@@ -47,7 +46,6 @@ public class Main extends ApplicationAdapter {
     public void create() {
         selectedMode = Mode.DRAW;
         batch = new SpriteBatch();
-        image = new Texture("libgdx.png");
         shapeRenderer = new ShapeRenderer();
 
         Gdx.input.setInputProcessor(new InputProcessorAOPi(this));
@@ -124,7 +122,6 @@ public class Main extends ApplicationAdapter {
     @Override
     public void dispose() {
         batch.dispose();
-        image.dispose();
     }
 
     @NotNull
