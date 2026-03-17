@@ -3,6 +3,8 @@
 
 The Flux Version of AetherOnePi is an historical reproduction of the original prototype from 2015, but with a modernized UI.
 
+![radionicsDevice.png](assets/radionicsDevice.png)
+
 You need Java 24 to run this.
 
 ## What does AOPi mean?
