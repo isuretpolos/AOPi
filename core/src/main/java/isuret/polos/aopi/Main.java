@@ -5,6 +5,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
@@ -13,77 +14,45 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.ScreenUtils;
+import isuret.polos.aopi.entities.Image;
+import isuret.polos.aopi.input.InputProcessorAOPi;
+import org.jetbrains.annotations.NotNull;
 
+import java.awt.*;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.Transferable;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 
 /** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
 public class Main extends ApplicationAdapter {
-    private enum Mode {
-        DRAW, BROADCAST
+    public enum Mode {
+        DRAW, TEXT
     }
-    private Mode selectedMode;
-    private SpriteBatch batch;
-    private Texture image;
-    private ShapeRenderer shapeRenderer;
-    private BitmapFont font;
-    private GlyphLayout layout = new GlyphLayout();
-    private boolean drawing = false;
-    private List<Rectangle> rectangles = new ArrayList<>();
-    private float touchDownX, touchDownY, touchUpX, touchUpY;
+    public Mode selectedMode;
+    public SpriteBatch batch;
+    public Texture image;
+    public ShapeRenderer shapeRenderer;
+    public BitmapFont font;
+    public GlyphLayout layout = new GlyphLayout();
+    public boolean drawing = false;
+    public List<Image> images = new ArrayList<>();
+    public List<Rectangle> rectangles = new ArrayList<>();
+    public float touchDownX, touchDownY, touchUpX, touchUpY;
+    public Texture imgPasted;
+    public String typedText = "";
 
     @Override
     public void create() {
+        selectedMode = Mode.DRAW;
         batch = new SpriteBatch();
         image = new Texture("libgdx.png");
         shapeRenderer = new ShapeRenderer();
 
-        Gdx.input.setInputProcessor(new InputAdapter() {
-            @Override
-            public boolean keyDown(int keycode) {
-                System.out.println("Key pressed: " + keycode);
-                if (keycode >= 145 && keycode <= 153) {
-                    selectedMode = Mode.values()[keycode - 145];
-                }
-                if (keycode == Input.Keys.ESCAPE) {
-                    Gdx.app.exit();
-                }
-                return true;
-            }
+        Gdx.input.setInputProcessor(new InputProcessorAOPi(this));
 
-            @Override
-            public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-                if (Mode.DRAW.equals(selectedMode) && button == Input.Buttons.LEFT) {
-                    drawing = true;
-                    touchDownX = screenX;
-                    touchDownY = Gdx.graphics.getHeight() - screenY;
-                }
-                return true;
-            }
-
-            @Override
-            public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-                if (Mode.DRAW.equals(selectedMode) &&button == Input.Buttons.LEFT) {
-                    drawing = false;
-                    rectangles.add(new Rectangle(touchDownX, touchDownY, touchUpX, touchUpY));
-                }
-                return true;
-            }
-        });
-
-        FreeTypeFontGenerator generator =
-            new FreeTypeFontGenerator(Gdx.files.internal("fonts/Funnel.ttf"));
-
-        FreeTypeFontGenerator.FreeTypeFontParameter parameter =
-            new FreeTypeFontGenerator.FreeTypeFontParameter();
-
-        parameter.size = 24;      // Schriftgröße
-        parameter.color = Color.WHITE;
-
-        font = generator.generateFont(parameter);
-
-        generator.dispose();
-
+        font = getFont("fonts/Funnel.ttf");
         float screenHeight = Gdx.graphics.getHeight();
         float screenWidth = Gdx.graphics.getWidth();
         System.out.println(screenWidth + "x" + screenHeight);
@@ -111,7 +80,19 @@ public class Main extends ApplicationAdapter {
             layout.setText(font, mode.name() + " [" + i + "]");
             x += layout.width + 10;
         }
+        if (selectedMode.equals(Mode.TEXT)) {
+            font.setColor(1, 1, 1, 1);
+            font.draw(batch, typedText, Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY() + font.getXHeight());
+        }
+        batch.end();
 
+        batch.begin();
+            for (Image image : images) {
+                batch.draw(image.getTexture(), image.getX(), image.getY());
+            }
+            if (imgPasted != null) {
+                batch.draw(imgPasted, mouseX, mouseY);
+            }
         batch.end();
 
         batch.begin();
@@ -138,28 +119,26 @@ public class Main extends ApplicationAdapter {
         }
         shapeRenderer.end();
 
-
-
-        /*batch.begin();
-        //batch.draw(image, 140, 210);
-
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
-        shapeRenderer.setColor(1, 0, 0, 1); // rot
-        shapeRenderer.circle(300, 300, 50);
-        shapeRenderer.end();
-
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
-        shapeRenderer.setColor(0, 1, 0, 1); // rot
-        shapeRenderer.line(100, 100, 300, 200);
-        shapeRenderer.rect(50, 50, 200, 120);
-        shapeRenderer.end();
-
-        batch.end();*/
     }
 
     @Override
     public void dispose() {
         batch.dispose();
         image.dispose();
+    }
+
+    @NotNull
+    private BitmapFont getFont(String fontPath) {
+        FreeTypeFontGenerator generator =
+            new FreeTypeFontGenerator(Gdx.files.internal(fontPath));
+
+        FreeTypeFontGenerator.FreeTypeFontParameter parameter =
+            new FreeTypeFontGenerator.FreeTypeFontParameter();
+
+        parameter.size = 24;
+        parameter.color = Color.WHITE;
+        BitmapFont f = generator.generateFont(parameter);
+        generator.dispose();
+        return f;
     }
 }
