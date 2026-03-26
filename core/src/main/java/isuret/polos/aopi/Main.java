@@ -32,7 +32,9 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 
-/** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
+/**
+ * {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms.
+ */
 public class Main extends ApplicationAdapter {
 
     private OrthographicCamera camera;
@@ -42,6 +44,7 @@ public class Main extends ApplicationAdapter {
     public enum Mode {
         OPERATE, EDIT, DRAW, TEXT
     }
+
     public Mode selectedMode;
     public Mode selectedSubMode;
     public SpriteBatch batch;
@@ -109,18 +112,18 @@ public class Main extends ApplicationAdapter {
             font.setColor(1, 1, 1, 1);
             font.draw(batch, typedText, mouseX, mouseY + font.getXHeight());
         }
-        batch.end();
 
-        batch.begin();
-            for (Image image : images) {
-                batch.draw(image.getTexture(), image.getX(), image.getY());
-            }
-            if (imgPasted != null) {
-                batch.draw(imgPasted, mouseX, mouseY);
-            }
-        batch.end();
+        for (Image image : images) {
+            batch.draw(image.getTexture(), image.getX(), image.getY());
+        }
+        if (imgPasted != null) {
+            batch.draw(imgPasted, mouseX, mouseY);
+        }
 
-        batch.begin();
+        for (Rectangle rectangle : rectangles) {
+            font.draw(batch, rectangle.toString(), rectangle.x, rectangle.y + 20 + rectangle.height);
+        }
+        font.draw(batch, mouseX + " x " + mouseY, mouseX, mouseY + font.getXHeight());
         //font.draw(batch, "MODE: " + selectedMode.g, 10, 10 + (font.getXHeight()*3));
         batch.end();
 
@@ -138,11 +141,13 @@ public class Main extends ApplicationAdapter {
             batch.end();
         }
 
+
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
         for (Rectangle rectangle : rectangles) {
             shapeRenderer.rect(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
         }
         shapeRenderer.end();
+
 
     }
 

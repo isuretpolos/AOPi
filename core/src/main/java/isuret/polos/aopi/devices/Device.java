@@ -3,12 +3,13 @@ package isuret.polos.aopi.devices;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
+import isuret.polos.aopi.entities.IEntity;
 import isuret.polos.aopi.entities.IGraphic;
 
 /**
  * Represents a device that can be controlled by the user.
  */
-public class Device implements IGraphic {
+public class Device implements IGraphic, IEntity {
 
     public String name;
     public String author;
@@ -78,6 +79,26 @@ public class Device implements IGraphic {
 
     public Rectangle getBounds() {
         return bounds;
+    }
+
+    @Override
+    public void setDeviceName(String deviceName) {
+        // ---
+    }
+
+    @Override
+    public String getDeviceName() {
+        return name;
+    }
+
+    @Override
+    public void setAction(String action) {
+        // Drag?
+    }
+
+    @Override
+    public String getAction() {
+        return "";
     }
 
     public void setBounds(Rectangle bounds) {

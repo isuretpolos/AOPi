@@ -9,6 +9,8 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Rectangle;
 import isuret.polos.aopi.Main;
 import isuret.polos.aopi.data.Database;
+import isuret.polos.aopi.devices.Device;
+import isuret.polos.aopi.entities.IEntity;
 import isuret.polos.aopi.entities.Image;
 import isuret.polos.aopi.entities.Text;
 
@@ -16,12 +18,25 @@ import java.awt.*;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.image.BufferedImage;
+import java.util.HashMap;
+import java.util.Map;
 
 public class InputProcessorAOPi implements InputProcessor {
+
     private Main main;
+    private final Map<IEntity, Rectangle> entities = new HashMap<>();
+
 
     public InputProcessorAOPi(Main main) {
         this.main = main;
+    }
+
+    public void registerObserver(IEntity entity) {
+        entities.put(entity, entity.getBounds());
+    }
+
+    public void unregisterObserver(IEntity entity) {
+        entities.remove(entity);
     }
 
     @Override
@@ -117,7 +132,19 @@ public class InputProcessorAOPi implements InputProcessor {
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
         if (Main.Mode.DRAW.equals(main.selectedMode) &&button == Input.Buttons.LEFT) {
             main.drawing = false;
-            main.rectangles.add(new Rectangle(main.touchDownX, main.touchDownY, main.touchUpX, main.touchUpY));
+            float width = main.touchUpX;
+            float height = main.touchUpX;
+            if (width < 0) {
+                width = -width;
+            }
+            if (height < 0) {
+                height = -height;
+            }
+            main.rectangles.add(new Rectangle(main.touchDownX, main.touchDownY, width, height));
+            System.out.println(main.touchDownX + "," + main.touchDownY + "," + width + "," + height);
+            // TEST
+            Device dev = new Device("Test", "Test", "Test", "Test", "Test", new Rectangle(main.touchDownX, main.touchDownY,width, height));
+            registerObserver(dev);
         }
         if (Main.Mode.TEXT.equals(main.selectedMode) && button == Input.Buttons.LEFT) {
             float[] mousePos = main.getMousePosition();
@@ -144,11 +171,30 @@ public class InputProcessorAOPi implements InputProcessor {
 
     @Override
     public boolean mouseMoved(int screenX, int screenY) {
+        float[] mousePos = main.getMousePosition();
+
+        IEntity hit = findEntityAt(mousePos[0], mousePos[0]);
+        System.out.println(mousePos[0] + "x" + mousePos[0]);
+        if (hit != null) {
+            System.out.println("HIT");
+            System.out.println("Hit entity: " + hit.getDeviceName());
+        }
         return false;
     }
 
     @Override
     public boolean scrolled(float amountX, float amountY) {
         return false;
+    }
+
+    private IEntity findEntityAt(float worldX, float worldY) {
+        for (Map.Entry<IEntity, Rectangle> entry : entities.entrySet()) {
+            Rectangle r = entry.getValue();
+            System.out.println(r);
+            if (r != null && r.contains(worldX, worldY)) {
+                return entry.getKey();
+            }
+        }
+        return null;
     }
 }
