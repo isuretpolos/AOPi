@@ -2,11 +2,8 @@ package isuret.polos.aopi;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
-import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
@@ -16,7 +13,6 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.ScreenUtils;
-import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import isuret.polos.aopi.data.Database;
@@ -25,10 +21,6 @@ import isuret.polos.aopi.entities.Text;
 import isuret.polos.aopi.input.InputProcessorAOPi;
 import org.jetbrains.annotations.NotNull;
 
-import java.awt.*;
-import java.awt.datatransfer.DataFlavor;
-import java.awt.datatransfer.Transferable;
-import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,14 +31,13 @@ public class Main extends ApplicationAdapter {
 
     private OrthographicCamera camera;
     private Viewport viewport;
-    private Vector3 mouse = new Vector3();
+    public Vector3 mouse = new Vector3();
 
     public enum Mode {
         OPERATE, EDIT, DRAW, TEXT
     }
 
     public Mode selectedMode;
-    public Mode selectedSubMode;
     public SpriteBatch batch;
     public ShapeRenderer shapeRenderer;
     public BitmapFont font;
@@ -73,9 +64,6 @@ public class Main extends ApplicationAdapter {
         Gdx.input.setInputProcessor(new InputProcessorAOPi(this));
 
         font = getFont("fonts/Funnel.ttf");
-        float screenHeight = Gdx.graphics.getHeight();
-        float screenWidth = Gdx.graphics.getWidth();
-        System.out.println(screenWidth + "x" + screenHeight);
     }
 
     @Override
@@ -83,66 +71,24 @@ public class Main extends ApplicationAdapter {
         ScreenUtils.clear(0.15f, 0.15f, 0.2f, 1f);
 
         camera.update();
+        mouse.set(Gdx.input.getX(), Gdx.input.getY(), 0);
+        //camera.unproject(mouse);
+        viewport.unproject(mouse);
         shapeRenderer.setProjectionMatrix(camera.combined);
         batch.setProjectionMatrix(camera.combined);
 
-        float[] mousePos = getMousePosition();
-        float mouseX = mousePos[0];
-        float mouseY = mousePos[1];
-
+        // DRAW batch always before shapeRenderer
         batch.begin();
-        int x = 10;
-        int i = 0;
-        for (Mode mode : Mode.values()) {
-            i++;
-            if (mode.equals(this.selectedMode)) {
-                font.setColor(1, 1, 1, 1);
-            } else {
-                font.setColor(0.5f, 0.5f, 0.5f, 1);
-            }
-            font.draw(batch, mode.name() + " [" + i + "]", x, 10 + font.getXHeight());
-            layout.setText(font, mode.name() + " [" + i + "]");
-            x += layout.width + 10;
-        }
-        for (Text text : texts) {
-            font.setColor(1, 1, 1, 1);
-            font.draw(batch, text.getText(), text.getX(), text.getY());
-        }
-        if (selectedMode.equals(Mode.TEXT)) {
-            font.setColor(1, 1, 1, 1);
-            font.draw(batch, typedText, mouseX, mouseY + font.getXHeight());
-        }
-
-        for (Image image : images) {
-            batch.draw(image.getTexture(), image.getX(), image.getY());
-        }
-        if (imgPasted != null) {
-            batch.draw(imgPasted, mouseX, mouseY);
-        }
-
-        for (Rectangle rectangle : rectangles) {
-            font.draw(batch, rectangle.toString(), rectangle.x, rectangle.y + 20 + rectangle.height);
-        }
-        font.draw(batch, mouseX + " x " + mouseY, mouseX, mouseY + font.getXHeight());
-        //font.draw(batch, "MODE: " + selectedMode.g, 10, 10 + (font.getXHeight()*3));
+        // TEST see the mouse position
+        font.draw(batch, mouse.x + " x " + mouse.y, mouse.x, mouse.y);
         batch.end();
 
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
         if (Mode.DRAW.equals(selectedMode) && drawing) {
-            shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
-            shapeRenderer.setColor(1, 1, 1, 1);
-            touchUpX = mousePos[0] - touchDownX;
-            touchUpY = mousePos[1] - touchDownY;
-            shapeRenderer.rect(touchDownX, touchDownY, touchUpX, touchUpY);
-            shapeRenderer.end();
-
-            batch.begin();
-            // let me see where we are
-            font.draw(batch, mouseX + " x " + mouseY, mouseX, mouseY);
-            batch.end();
+            shapeRenderer.setColor(1, 0, 1, 1);
+            shapeRenderer.rect(touchDownX, touchDownY, mouse.x - touchDownX, mouse.y - touchDownY);
         }
 
-
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
         for (Rectangle rectangle : rectangles) {
             shapeRenderer.rect(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
         }
@@ -177,9 +123,4 @@ public class Main extends ApplicationAdapter {
         viewport.update(width, height, true);
     }
 
-    public float[] getMousePosition() {
-        mouse.set(Gdx.input.getX(), Gdx.input.getY(), 0);
-        viewport.unproject(mouse);
-        return new float[]{mouse.x, mouse.y};
-    }
 }

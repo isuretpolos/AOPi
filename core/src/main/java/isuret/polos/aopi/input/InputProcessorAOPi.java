@@ -121,9 +121,8 @@ public class InputProcessorAOPi implements InputProcessor {
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
         if (Main.Mode.DRAW.equals(main.selectedMode) && button == Input.Buttons.LEFT) {
             main.drawing = true;
-            float[] mousePos = main.getMousePosition();
-            main.touchDownX = mousePos[0];
-            main.touchDownY = mousePos[1];
+            main.touchDownX = main.mouse.x;
+            main.touchDownY = main.mouse.y;
         }
         return true;
     }
@@ -132,23 +131,14 @@ public class InputProcessorAOPi implements InputProcessor {
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
         if (Main.Mode.DRAW.equals(main.selectedMode) &&button == Input.Buttons.LEFT) {
             main.drawing = false;
-            float width = main.touchUpX;
-            float height = main.touchUpX;
-            if (width < 0) {
-                width = -width;
-            }
-            if (height < 0) {
-                height = -height;
-            }
-            main.rectangles.add(new Rectangle(main.touchDownX, main.touchDownY, width, height));
-            System.out.println(main.touchDownX + "," + main.touchDownY + "," + width + "," + height);
+            main.rectangles.add(new Rectangle(main.touchDownX, main.touchDownY, main.mouse.x - main.touchDownX, main.mouse.y - main.touchDownY));
             // TEST
-            Device dev = new Device("Test", "Test", "Test", "Test", "Test", new Rectangle(main.touchDownX, main.touchDownY,width, height));
+            Device dev = new Device("Test", "Test", "Test", "Test", "Test",
+                new Rectangle(main.touchDownX, main.touchDownY, main.mouse.x - main.touchDownX, main.mouse.y - main.touchDownY));
             registerObserver(dev);
         }
         if (Main.Mode.TEXT.equals(main.selectedMode) && button == Input.Buttons.LEFT) {
-            float[] mousePos = main.getMousePosition();
-            main.texts.add(new Text(main.typedText, mousePos[0], mousePos[1] + 12, 12, 1));
+            main.texts.add(new Text(main.typedText, Gdx.input.getX(), Gdx.input.getY() + 12, 12, 1));
             Database.setValue("text-test",main.texts.get(main.texts.size()-1));
             main.typedText = "";
         }
@@ -171,10 +161,9 @@ public class InputProcessorAOPi implements InputProcessor {
 
     @Override
     public boolean mouseMoved(int screenX, int screenY) {
-        float[] mousePos = main.getMousePosition();
 
-        IEntity hit = findEntityAt(mousePos[0], mousePos[0]);
-        System.out.println(mousePos[0] + "x" + mousePos[0]);
+        // NOTE if the mouse coordinates are too slow, then get the unprojected coordinates here
+        IEntity hit = findEntityAt(main.mouse.x, main.mouse.y);
         if (hit != null) {
             System.out.println("HIT");
             System.out.println("Hit entity: " + hit.getDeviceName());
@@ -189,9 +178,9 @@ public class InputProcessorAOPi implements InputProcessor {
 
     private IEntity findEntityAt(float worldX, float worldY) {
         for (Map.Entry<IEntity, Rectangle> entry : entities.entrySet()) {
-            Rectangle r = entry.getValue();
-            System.out.println(r);
-            if (r != null && r.contains(worldX, worldY)) {
+            System.out.println("Checking entity: " + entry.getValue().getClass().getSimpleName());
+            if (entry.getValue().contains(worldX, worldY)) {
+                System.out.println("Found entity: " + entry.getKey().getDeviceName());
                 return entry.getKey();
             }
         }
