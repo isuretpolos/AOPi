@@ -15,10 +15,13 @@ public class Button implements IEntity, IGraphic {
     private Image imageOn;
     private boolean isOn = false;
     private Rectangle bounds;
+    private boolean mouseOver = false;
 
     public String getAction() {
         return action;
     }
+
+
 
     public void setAction(String action) {
         this.action = action;
@@ -74,5 +77,14 @@ public class Button implements IEntity, IGraphic {
     @Override
     public void draw(ShapeRenderer shapeRenderer) {
 
+    }
+
+    @Override
+    public void setMouseOver(boolean mouseOver) {
+        this.mouseOver = mouseOver;
+    }
+
+    public boolean isMouseOver() {
+        return mouseOver;
     }
 }

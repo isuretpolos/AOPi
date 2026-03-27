@@ -19,4 +19,8 @@ public interface IEntity {
     void setAction(String action);
 
     String getAction();
+
+    void setMouseOver(boolean mouseOver);
+
+    boolean isMouseOver();
 }

@@ -25,6 +25,7 @@ public class Device implements IGraphic, IEntity {
      * it is inside this rectangle, it is considered to be part of this device.
      */
     public Rectangle bounds;
+    public boolean mouseOver = false;
 
     public Device(String name, String author, String description, String url, String image, Rectangle bounds) {
         this.name = name;
@@ -99,6 +100,16 @@ public class Device implements IGraphic, IEntity {
     @Override
     public String getAction() {
         return "";
+    }
+
+    @Override
+    public void setMouseOver(boolean mouseOver) {
+        this.mouseOver = mouseOver;
+    }
+
+    @Override
+    public boolean isMouseOver() {
+        return mouseOver;
     }
 
     public void setBounds(Rectangle bounds) {

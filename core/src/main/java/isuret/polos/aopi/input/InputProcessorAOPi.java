@@ -136,10 +136,9 @@ public class InputProcessorAOPi implements InputProcessor {
         if (Main.Mode.DRAW.equals(main.selectedMode) &&button == Input.Buttons.LEFT) {
             main.drawing = false;
             Rectangle rect = ShapeTool.createNormalizedRectangle(main.touchDownX, main.touchDownY, main.mouse.x, main.mouse.y);
-            main.rectangles.add(rect);
-            // TEST
             Device dev = new Device("Test", "Test", "Test", "Test", "Test", rect);
             registerObserver(dev);
+            main.devices.add(dev);
         }
         if (Main.Mode.TEXT.equals(main.selectedMode) && button == Input.Buttons.LEFT) {
             main.texts.add(new Text(main.typedText, Gdx.input.getX(), Gdx.input.getY() + 12, 12, 1));
@@ -167,11 +166,15 @@ public class InputProcessorAOPi implements InputProcessor {
     public boolean mouseMoved(int screenX, int screenY) {
 
         Vector3 tmp = new Vector3(screenX, screenY, 0);
-        main.viewport.unproject(tmp);   // oder main.viewport, falls zugreifbar
+        main.viewport.unproject(tmp);
+
+        for (IEntity entity : entities.keySet()) {
+            entity.setMouseOver(false);
+        }
 
         IEntity hit = findEntityAt(tmp.x, tmp.y);
         if (hit != null) {
-            System.out.println("Hit entity: " + hit.getDeviceName() + " " + LocalTime.now() + " " + LocalDate.now());
+            hit.setMouseOver(true);
         }
         return false;
     }

@@ -16,6 +16,7 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import isuret.polos.aopi.data.Database;
+import isuret.polos.aopi.devices.Device;
 import isuret.polos.aopi.entities.Image;
 import isuret.polos.aopi.entities.Text;
 import isuret.polos.aopi.input.InputProcessorAOPi;
@@ -45,7 +46,7 @@ public class Main extends ApplicationAdapter {
     public boolean drawing = false;
     public List<Text> texts = new ArrayList<>();
     public List<Image> images = new ArrayList<>();
-    public List<Rectangle> rectangles = new ArrayList<>();
+    public List<Device> devices = new ArrayList<>();
     public float touchDownX, touchDownY, touchUpX, touchUpY;
     public Texture imgPasted;
     public String typedText = "";
@@ -85,11 +86,17 @@ public class Main extends ApplicationAdapter {
 
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
         if (Mode.DRAW.equals(selectedMode) && drawing) {
-            shapeRenderer.setColor(1, 0, 1, 1);
+            shapeRenderer.setColor(1, 1, 1, 1);
             shapeRenderer.rect(touchDownX, touchDownY, mouse.x - touchDownX, mouse.y - touchDownY);
         }
 
-        for (Rectangle rectangle : rectangles) {
+        for (Device device : devices) {
+            if (device.isMouseOver()) {
+                shapeRenderer.setColor(1, 0, 0, 1);
+            } else {
+                shapeRenderer.setColor(1, 1, 1, 1);
+            }
+            Rectangle rectangle = device.getBounds();
             shapeRenderer.rect(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
         }
         shapeRenderer.end();
