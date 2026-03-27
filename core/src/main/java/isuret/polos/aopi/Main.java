@@ -30,7 +30,7 @@ import java.util.List;
 public class Main extends ApplicationAdapter {
 
     private OrthographicCamera camera;
-    private Viewport viewport;
+    public Viewport viewport;
     public Vector3 mouse = new Vector3();
 
     public enum Mode {

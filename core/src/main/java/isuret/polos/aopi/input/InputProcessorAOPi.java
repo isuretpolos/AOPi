@@ -7,17 +7,21 @@ import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector3;
 import isuret.polos.aopi.Main;
 import isuret.polos.aopi.data.Database;
 import isuret.polos.aopi.devices.Device;
 import isuret.polos.aopi.entities.IEntity;
 import isuret.polos.aopi.entities.Image;
+import isuret.polos.aopi.entities.ShapeTool;
 import isuret.polos.aopi.entities.Text;
 
 import java.awt.*;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.image.BufferedImage;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -131,10 +135,10 @@ public class InputProcessorAOPi implements InputProcessor {
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
         if (Main.Mode.DRAW.equals(main.selectedMode) &&button == Input.Buttons.LEFT) {
             main.drawing = false;
-            main.rectangles.add(new Rectangle(main.touchDownX, main.touchDownY, main.mouse.x - main.touchDownX, main.mouse.y - main.touchDownY));
+            Rectangle rect = ShapeTool.createNormalizedRectangle(main.touchDownX, main.touchDownY, main.mouse.x, main.mouse.y);
+            main.rectangles.add(rect);
             // TEST
-            Device dev = new Device("Test", "Test", "Test", "Test", "Test",
-                new Rectangle(main.touchDownX, main.touchDownY, main.mouse.x - main.touchDownX, main.mouse.y - main.touchDownY));
+            Device dev = new Device("Test", "Test", "Test", "Test", "Test", rect);
             registerObserver(dev);
         }
         if (Main.Mode.TEXT.equals(main.selectedMode) && button == Input.Buttons.LEFT) {
@@ -162,11 +166,12 @@ public class InputProcessorAOPi implements InputProcessor {
     @Override
     public boolean mouseMoved(int screenX, int screenY) {
 
-        // NOTE if the mouse coordinates are too slow, then get the unprojected coordinates here
-        IEntity hit = findEntityAt(main.mouse.x, main.mouse.y);
+        Vector3 tmp = new Vector3(screenX, screenY, 0);
+        main.viewport.unproject(tmp);   // oder main.viewport, falls zugreifbar
+
+        IEntity hit = findEntityAt(tmp.x, tmp.y);
         if (hit != null) {
-            System.out.println("HIT");
-            System.out.println("Hit entity: " + hit.getDeviceName());
+            System.out.println("Hit entity: " + hit.getDeviceName() + " " + LocalTime.now() + " " + LocalDate.now());
         }
         return false;
     }
@@ -178,9 +183,7 @@ public class InputProcessorAOPi implements InputProcessor {
 
     private IEntity findEntityAt(float worldX, float worldY) {
         for (Map.Entry<IEntity, Rectangle> entry : entities.entrySet()) {
-            System.out.println("Checking entity: " + entry.getValue().getClass().getSimpleName());
             if (entry.getValue().contains(worldX, worldY)) {
-                System.out.println("Found entity: " + entry.getKey().getDeviceName());
                 return entry.getKey();
             }
         }
