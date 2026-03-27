@@ -1,15 +1,16 @@
 package isuret.polos.aopi.devices;
 
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector3;
 import isuret.polos.aopi.entities.IEntity;
-import isuret.polos.aopi.entities.IGraphic;
 
 /**
  * Represents a device that can be controlled by the user.
  */
-public class Device implements IGraphic, IEntity {
+public class Device implements IEntity {
 
     public String name;
     public String author;
@@ -117,12 +118,12 @@ public class Device implements IGraphic, IEntity {
     }
 
     @Override
-    public void render(SpriteBatch batch) {
+    public void render(SpriteBatch batch, BitmapFont font, Vector3 mouse) {
 
     }
 
     @Override
-    public void draw(ShapeRenderer shapeRenderer) {
+    public void draw(ShapeRenderer shapeRenderer, Vector3 mouse) {
 
     }
 }

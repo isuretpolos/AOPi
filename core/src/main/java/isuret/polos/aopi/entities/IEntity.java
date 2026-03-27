@@ -5,7 +5,7 @@ import com.badlogic.gdx.math.Rectangle;
 /**
  * Interaction entity, reacting to user input.
  */
-public interface IEntity {
+public interface IEntity extends IGraphic {
 
     /**
      * Get the bounding rectangle of the entity

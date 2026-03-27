@@ -1,16 +1,18 @@
 package isuret.polos.aopi.devices;
 
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector3;
 import isuret.polos.aopi.entities.IEntity;
-import isuret.polos.aopi.entities.IGraphic;
 import isuret.polos.aopi.entities.Image;
 
-public class Button implements IEntity, IGraphic {
+public class Button implements IEntity {
 
     private String action;
     private String deviceName;
+    private String text;
     private Image imageOff;
     private Image imageOn;
     private boolean isOn = false;
@@ -20,8 +22,6 @@ public class Button implements IEntity, IGraphic {
     public String getAction() {
         return action;
     }
-
-
 
     public void setAction(String action) {
         this.action = action;
@@ -70,13 +70,13 @@ public class Button implements IEntity, IGraphic {
     }
 
     @Override
-    public void render(SpriteBatch batch) {
-
+    public void render(SpriteBatch batch, BitmapFont font, Vector3 mouse) {
+        font.draw(batch, text, bounds.x + 10, bounds.y + (font.getLineHeight()/1.33f));
     }
 
     @Override
-    public void draw(ShapeRenderer shapeRenderer) {
-
+    public void draw(ShapeRenderer shapeRenderer, Vector3 mouse) {
+        shapeRenderer.rect(bounds.x, bounds.y, bounds.width, bounds.height);
     }
 
     @Override
@@ -86,5 +86,13 @@ public class Button implements IEntity, IGraphic {
 
     public boolean isMouseOver() {
         return mouseOver;
+    }
+
+    public String getText() {
+        return text;
+    }
+
+    public void setText(String text) {
+        this.text = text;
     }
 }

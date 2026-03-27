@@ -22,25 +22,16 @@ import java.awt.datatransfer.Transferable;
 import java.awt.image.BufferedImage;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class InputProcessorAOPi implements InputProcessor {
 
     private Main main;
-    private final Map<IEntity, Rectangle> entities = new HashMap<>();
-
-
     public InputProcessorAOPi(Main main) {
         this.main = main;
-    }
-
-    public void registerObserver(IEntity entity) {
-        entities.put(entity, entity.getBounds());
-    }
-
-    public void unregisterObserver(IEntity entity) {
-        entities.remove(entity);
     }
 
     @Override
@@ -115,15 +106,15 @@ public class InputProcessorAOPi implements InputProcessor {
 
     @Override
     public boolean keyTyped(char character) {
-        if (main.selectedMode.equals(Main.Mode.TEXT) && Character.isLetterOrDigit(character)) {
+        /*if (main.selectedMode.equals(Main.Mode.TEXT) && Character.isLetterOrDigit(character)) {
             main.typedText += character;
-        }
+        }*/
         return true;
     }
 
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-        if (Main.Mode.DRAW.equals(main.selectedMode) && button == Input.Buttons.LEFT) {
+        if (Main.Mode.F2DeviceEditor.equals(main.selectedMode) && button == Input.Buttons.LEFT) {
             main.drawing = true;
             main.touchDownX = main.mouse.x;
             main.touchDownY = main.mouse.y;
@@ -133,20 +124,21 @@ public class InputProcessorAOPi implements InputProcessor {
 
     @Override
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-        if (Main.Mode.DRAW.equals(main.selectedMode) &&button == Input.Buttons.LEFT) {
+        Vector3 tmp = new Vector3(screenX, screenY, 0);
+        main.viewport.unproject(tmp);
+        if (Main.Mode.F2DeviceEditor.equals(main.selectedMode) &&button == Input.Buttons.LEFT) {
             main.drawing = false;
-            Rectangle rect = ShapeTool.createNormalizedRectangle(main.touchDownX, main.touchDownY, main.mouse.x, main.mouse.y);
+            Rectangle rect = ShapeTool.createNormalizedRectangle(main.touchDownX, main.touchDownY, tmp.x, tmp.y);
             Device dev = new Device("Test", "Test", "Test", "Test", "Test", rect);
-            registerObserver(dev);
-            main.devices.add(dev);
+            main.entities.add(dev);
         }
-        if (Main.Mode.TEXT.equals(main.selectedMode) && button == Input.Buttons.LEFT) {
+        /*if (Main.Mode.TEXT.equals(main.selectedMode) && button == Input.Buttons.LEFT) {
             main.texts.add(new Text(main.typedText, Gdx.input.getX(), Gdx.input.getY() + 12, 12, 1));
             Database.setValue("text-test",main.texts.get(main.texts.size()-1));
             main.typedText = "";
-        }
+        }*/
         if (main.imgPasted != null) {
-            main.images.add(new Image(main.imgPasted, Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY()));
+            main.images.add(new Image(main.imgPasted, tmp.x, tmp.y));
             main.imgPasted = null;
         }
         return true;
@@ -168,7 +160,7 @@ public class InputProcessorAOPi implements InputProcessor {
         Vector3 tmp = new Vector3(screenX, screenY, 0);
         main.viewport.unproject(tmp);
 
-        for (IEntity entity : entities.keySet()) {
+        for (IEntity entity : main.entities) {
             entity.setMouseOver(false);
         }
 
@@ -185,9 +177,11 @@ public class InputProcessorAOPi implements InputProcessor {
     }
 
     private IEntity findEntityAt(float worldX, float worldY) {
-        for (Map.Entry<IEntity, Rectangle> entry : entities.entrySet()) {
-            if (entry.getValue().contains(worldX, worldY)) {
-                return entry.getKey();
+        // reverse order so that the topmost entity is checked first
+        for (int i=main.entities.size() - 1; i >= 0; i--) {
+            IEntity entity = main.entities.get(i);
+            if (entity.getBounds().contains(worldX, worldY)) {
+                return entity;
             }
         }
         return null;

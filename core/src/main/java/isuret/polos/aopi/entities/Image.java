@@ -7,7 +7,7 @@ public class Image extends Position {
     private String path;
     private Texture texture;
 
-    public Image(Texture texture, int x, int y) {
+    public Image(Texture texture, float x, float y) {
         super(x, y);
         this.texture = texture;
     }
