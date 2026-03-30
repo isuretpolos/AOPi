@@ -18,6 +18,7 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import isuret.polos.aopi.data.Database;
 import isuret.polos.aopi.devices.Button;
 import isuret.polos.aopi.devices.Device;
+import isuret.polos.aopi.devices.IntentionRepeater;
 import isuret.polos.aopi.entities.IEntity;
 import isuret.polos.aopi.entities.Image;
 import isuret.polos.aopi.entities.Text;
@@ -94,6 +95,13 @@ public class Main extends ApplicationAdapter {
         addButton("F3 Help", 10, y, width, 30); y -= 35;
         addButton("F2 Device Editor", 10, y, width, 30); y -= 35;
         addButton("F1 Operation", 10, y, width, 30); y -= 35;
+
+        IntentionRepeater intentionRepeater = new IntentionRepeater();
+        Vector3 tmp = new Vector3(10, y, 0);
+        viewport.unproject(tmp);
+        intentionRepeater.setBounds(new Rectangle(tmp.x, tmp.y, width, 30));
+        intentionRepeater.startBroadcast();
+        entities.add(intentionRepeater);
 
     }
 
