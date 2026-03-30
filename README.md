@@ -1,7 +1,5 @@
-# AetherOnePi
-## Flux Version
-
-The Flux Version of AetherOnePi is an historical reproduction of the original prototype from 2015, but with a modernized UI.
+# AetherOneFlux
+The Flux Version of [AetherOnePi](https://github.com/isuretpolos/AetherOnePi) is an [historical reproduction of the original prototype from 2015](https://github.com/isuretpolos/AOPi/wiki), but with a modernized UI and fresh new ideas.
 
 ![radionicsDevice.png](assets/radionicsDevice.png)
 
@@ -11,8 +9,8 @@ You need Java 24 to run this.
 - AOPi = AetherOnePi
 - AOPi = Alpha Omega Pi
 - AOPi = Aether One Pi
-# What is AetherOnePi?
-A free and open source Radionics Software, written in Java, using libGDX as a rendering library.
+# What is AetherOneFlux?
+A free and open source Radionics Software, written in Java. This version is based on the libGDX, a very powerful rendering library.
 
 ## What is Radionics?
 Radionics is essentially Computer Aided Psionics. It helps to analyze pre-material imbalances of energy fields.
