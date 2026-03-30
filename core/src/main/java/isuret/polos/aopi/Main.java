@@ -115,20 +115,9 @@ public class Main extends ApplicationAdapter {
         shapeRenderer.setProjectionMatrix(camera.combined);
         batch.setProjectionMatrix(camera.combined);
 
-        // DRAW batch always before shapeRenderer
-        batch.begin();
-        // TEST see the mouse position
-        font.draw(batch, mouse.x + " x " + mouse.y, mouse.x, mouse.y);
-        for (IEntity entity : entities) {
-            entity.render(batch, font, mouse);
-        }
-        batch.end();
-
-        // SHAPES
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
-
         if (Mode.F2DeviceEditor.equals(selectedMode)) {
 
+            shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
             for (int i = 0; i < Gdx.graphics.getWidth(); i += 40) {
                 shapeRenderer.setColor(0.2f, 0.2f, 0.2f, 0.2f);
                 shapeRenderer.line(i, 0, i, Gdx.graphics.getHeight());
@@ -142,19 +131,22 @@ public class Main extends ApplicationAdapter {
                 shapeRenderer.setColor(1, 1, 1, 1);
                 shapeRenderer.rect(touchDownX, touchDownY, mouse.x - touchDownX, mouse.y - touchDownY);
             }
+            shapeRenderer.end();
 
             for (IEntity entity : entities) {
-                if (entity.isMouseOver()) {
-                    shapeRenderer.setColor(1, 0, 0, 1);
-                } else {
-                    shapeRenderer.setColor(1, 1, 1, 1);
-                }
-                Rectangle rectangle = entity.getBounds();
-                shapeRenderer.rect(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
                 entity.draw(shapeRenderer, mouse);
             }
+
+            batch.begin();
+            font.draw(batch, mouse.x + " x " + mouse.y, mouse.x, mouse.y);
+            batch.end();
         }
-        shapeRenderer.end();
+
+        batch.begin();
+        for (IEntity entity : entities) {
+            entity.render(batch, font, mouse);
+        }
+        batch.end();
 
     }
 

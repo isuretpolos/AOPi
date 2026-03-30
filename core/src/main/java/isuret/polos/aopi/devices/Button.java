@@ -17,7 +17,15 @@ public class Button extends DefaultEntity {
 
     @Override
     public void draw(ShapeRenderer shapeRenderer, Vector3 mouse) {
+
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+        if (isMouseOver()) {
+            shapeRenderer.setColor(1, 0, 0, 1);
+        } else {
+            shapeRenderer.setColor(1, 1, 1, 1);
+        }
         shapeRenderer.rect(bounds.x, bounds.y, bounds.width, bounds.height);
+        shapeRenderer.end();
     }
 
 

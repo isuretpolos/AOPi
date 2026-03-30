@@ -15,7 +15,7 @@ public class IntentionRepeater extends Device {
     public void startBroadcast() {
         repeaterService.broadcastRepetition(
             "I am calm and focused.",
-            "00:05:00",
+            "00:00:10",
             0.25,
             "EXACT",
             0,
@@ -64,11 +64,26 @@ public class IntentionRepeater extends Device {
 
     @Override
     public void render(SpriteBatch batch, BitmapFont font, Vector3 mouse) {
-        font.draw(batch, statusText, bounds.x + 10, bounds.y + (font.getLineHeight()/1.33f));
+        font.draw(batch, statusText + progressBar, bounds.x + 10, bounds.y + (font.getLineHeight()/1.33f));
     }
 
     @Override
     public void draw(ShapeRenderer shapeRenderer, Vector3 mouse) {
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+
+        // background (red)
+        shapeRenderer.setColor(1f, 0f, 0f, 1f);
         shapeRenderer.rect(bounds.x, bounds.y, bounds.width, bounds.height);
+
+        // progress (green)
+        shapeRenderer.setColor(0f, 1f, 0f, 1f);
+        shapeRenderer.rect(
+            bounds.x + 2,
+            bounds.y + 2,
+            bounds.width * progressBar,
+            bounds.height - 4
+        );
+
+        shapeRenderer.end();
     }
 }
