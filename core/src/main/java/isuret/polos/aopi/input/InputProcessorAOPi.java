@@ -9,23 +9,16 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
 import isuret.polos.aopi.Main;
-import isuret.polos.aopi.data.Database;
 import isuret.polos.aopi.devices.Device;
 import isuret.polos.aopi.entities.IEntity;
 import isuret.polos.aopi.entities.Image;
+import isuret.polos.aopi.entities.Layer;
 import isuret.polos.aopi.entities.ShapeTool;
-import isuret.polos.aopi.entities.Text;
 
 import java.awt.*;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.image.BufferedImage;
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public class InputProcessorAOPi implements InputProcessor {
 
@@ -40,15 +33,35 @@ public class InputProcessorAOPi implements InputProcessor {
 
         if (keycode == Input.Keys.ESCAPE) {
             Gdx.app.exit();
-        }
-
-        if (keycode == Input.Keys.F11) {
+        } else if (keycode == Input.Keys.F1) {
+            main.selectedMode = Main.Mode.F1_Operation;
+        } else if (keycode == Input.Keys.F2) {
+            main.selectedMode = Main.Mode.F2_DeviceEditor;
+        } else if (keycode == Input.Keys.F3) {
+            main.selectedMode = Main.Mode.F3_Help;
+        } else if (keycode == Input.Keys.F4) {
+            main.selectedMode = Main.Mode.F4_Case;
+        } else if (keycode == Input.Keys.F5) {
+            main.selectedMode = Main.Mode.F5_Analyze;
+        } else if (keycode == Input.Keys.F6) {
+            main.selectedMode = Main.Mode.F6Broadcast;
+        } else if (keycode == Input.Keys.F7) {
+            main.selectedMode = Main.Mode.F7Database;
+        } else if (keycode == Input.Keys.F8) {
+            main.selectedMode = Main.Mode.F8RatesTrends;
+        } else if (keycode == Input.Keys.F9) {
+            main.selectedMode = Main.Mode.F9Reports;
+        } else if (keycode == Input.Keys.F10) {
+            main.selectedMode = Main.Mode.F10Settings;
+        } else if (keycode == Input.Keys.F11) {
             if (Gdx.graphics.isFullscreen()) {
                 Gdx.graphics.setWindowedMode(1280, 800);
             } else {
                 Graphics.DisplayMode mode = Gdx.graphics.getDisplayMode();
                 Gdx.graphics.setFullscreenMode(mode);
             }
+        } else if (keycode == Input.Keys.F12) {
+            main.selectedMode = Main.Mode.F12Debug;
         }
 
         if (keycode == Input.Keys.BACKSPACE) {
@@ -114,7 +127,7 @@ public class InputProcessorAOPi implements InputProcessor {
 
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-        if (Main.Mode.F2DeviceEditor.equals(main.selectedMode) && button == Input.Buttons.LEFT) {
+        if (Main.Mode.F2_DeviceEditor.equals(main.selectedMode) && Main.SubModeEditor.NewDevice.equals(main.selectedSubMode) && button == Input.Buttons.LEFT) {
             main.drawing = true;
             main.touchDownX = main.mouse.x;
             main.touchDownY = main.mouse.y;
@@ -126,11 +139,12 @@ public class InputProcessorAOPi implements InputProcessor {
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
         Vector3 tmp = new Vector3(screenX, screenY, 0);
         main.viewport.unproject(tmp);
-        if (Main.Mode.F2DeviceEditor.equals(main.selectedMode) &&button == Input.Buttons.LEFT) {
+        if (Main.Mode.F2_DeviceEditor.equals(main.selectedMode) && Main.SubModeEditor.NewDevice.equals(main.selectedSubMode) && button == Input.Buttons.LEFT) {
             main.drawing = false;
+            main.selectedSubMode = Main.SubModeEditor.MoveDevice;
             Rectangle rect = ShapeTool.createNormalizedRectangle(main.touchDownX, main.touchDownY, tmp.x, tmp.y);
             Device dev = new Device("Test", "Test", "Test", "Test", "Test", rect);
-            main.entities.add(dev);
+            main.getLayer(Main.LayerType.Device).getEntities().add(dev);
         }
         /*if (Main.Mode.TEXT.equals(main.selectedMode) && button == Input.Buttons.LEFT) {
             main.texts.add(new Text(main.typedText, Gdx.input.getX(), Gdx.input.getY() + 12, 12, 1));
@@ -160,8 +174,10 @@ public class InputProcessorAOPi implements InputProcessor {
         Vector3 tmp = new Vector3(screenX, screenY, 0);
         main.viewport.unproject(tmp);
 
-        for (IEntity entity : main.entities) {
-            entity.setMouseOver(false);
+        for (Layer layer : main.layers) {
+            for (IEntity entity : layer.getEntities()) {
+                entity.setMouseOver(false);
+            }
         }
 
         IEntity hit = findEntityAt(tmp.x, tmp.y);
@@ -178,10 +194,13 @@ public class InputProcessorAOPi implements InputProcessor {
 
     private IEntity findEntityAt(float worldX, float worldY) {
         // reverse order so that the topmost entity is checked first
-        for (int i=main.entities.size() - 1; i >= 0; i--) {
-            IEntity entity = main.entities.get(i);
-            if (entity.getBounds().contains(worldX, worldY)) {
-                return entity;
+        for (int j=main.layers.size() - 1; j >= 0; j--) {
+            Layer layer = main.layers.get(j);
+            for (int i = layer.getEntities().size() - 1; i >= 0; i--) {
+                IEntity entity = layer.getEntities().get(i);
+                if (entity.getBounds().contains(worldX, worldY)) {
+                    return entity;
+                }
             }
         }
         return null;

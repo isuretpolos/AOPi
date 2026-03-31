@@ -17,10 +17,9 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import isuret.polos.aopi.data.Database;
 import isuret.polos.aopi.devices.Button;
-import isuret.polos.aopi.devices.Device;
-import isuret.polos.aopi.devices.IntentionRepeater;
 import isuret.polos.aopi.entities.IEntity;
 import isuret.polos.aopi.entities.Image;
+import isuret.polos.aopi.entities.Layer;
 import isuret.polos.aopi.entities.Text;
 import isuret.polos.aopi.input.InputProcessorAOPi;
 import org.jetbrains.annotations.NotNull;
@@ -38,11 +37,11 @@ public class Main extends ApplicationAdapter {
     public Vector3 mouse = new Vector3();
 
     public enum Mode {
-        F1Operation,
-        F2DeviceEditor,
-        F3Help,
-        F4Case,
-        F5Analyze,
+        F1_Operation,
+        F2_DeviceEditor,
+        F3_Help,
+        F4_Case,
+        F5_Analyze,
         F6Broadcast,
         F7Database,
         F8RatesTrends,
@@ -52,7 +51,27 @@ public class Main extends ApplicationAdapter {
         F12Debug
     }
 
+    public enum SubModeEditor {
+        NewDevice,
+        MoveDevice,
+        EditDevice,
+        DeleteDevice,
+        NewElement,
+        MoveElement,
+        EditElement,
+        DeleteElement,
+    }
+
+    public enum LayerType {
+        Background,
+        Editor,
+        Device,
+        Elements,
+        Overlay
+    }
+
     public Mode selectedMode;
+    public SubModeEditor selectedSubMode;
     public SpriteBatch batch;
     public ShapeRenderer shapeRenderer;
     public BitmapFont font;
@@ -60,14 +79,15 @@ public class Main extends ApplicationAdapter {
     public boolean drawing = false;
     public List<Text> texts = new ArrayList<>();
     public List<Image> images = new ArrayList<>();
-    public List<IEntity> entities = new ArrayList<>();
+    public List<Layer> layers = new ArrayList<>();
     public float touchDownX, touchDownY;
     public Texture imgPasted;
     public String typedText = "";
 
     @Override
     public void create() {
-        selectedMode = Mode.F2DeviceEditor;
+        selectedMode = Mode.F2_DeviceEditor;
+        selectedSubMode = SubModeEditor.NewDevice;
         batch = new SpriteBatch();
         shapeRenderer = new ShapeRenderer();
 
@@ -80,6 +100,11 @@ public class Main extends ApplicationAdapter {
 
         font = getFont("fonts/Funnel.ttf");
 
+        layers.add(new Layer(LayerType.Background, 0, true));
+        layers.add(new Layer(LayerType.Device, 2, true));
+        layers.add(new Layer(LayerType.Elements, 3, true));
+
+        /*
         float width = 300;
         float y = Gdx.graphics.getHeight() - 10;
 
@@ -101,7 +126,7 @@ public class Main extends ApplicationAdapter {
         viewport.unproject(tmp);
         intentionRepeater.setBounds(new Rectangle(tmp.x, tmp.y, width, 30));
         intentionRepeater.startBroadcast();
-        entities.add(intentionRepeater);
+        getLayer(LayerType.Elements).getEntities().add(intentionRepeater);*/
 
     }
 
@@ -115,7 +140,14 @@ public class Main extends ApplicationAdapter {
         shapeRenderer.setProjectionMatrix(camera.combined);
         batch.setProjectionMatrix(camera.combined);
 
-        if (Mode.F2DeviceEditor.equals(selectedMode)) {
+        batch.begin();
+        font.draw(batch, selectedMode.name(), 10, 10 + font.getLineHeight());
+        if (Mode.F2_DeviceEditor.equals(selectedMode)) {
+            font.draw(batch, selectedSubMode.name(), 10, 10 + font.getLineHeight() * 2);
+        }
+        batch.end();
+
+        if (Mode.F2_DeviceEditor.equals(selectedMode)) {
 
             shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
             for (int i = 0; i < Gdx.graphics.getWidth(); i += 40) {
@@ -133,8 +165,10 @@ public class Main extends ApplicationAdapter {
             }
             shapeRenderer.end();
 
-            for (IEntity entity : entities) {
-                entity.draw(shapeRenderer, mouse);
+            for (Layer layer : layers) {
+                for (IEntity entity : layer.getEntities()) {
+                    entity.draw(shapeRenderer, mouse);
+                }
             }
 
             batch.begin();
@@ -143,8 +177,10 @@ public class Main extends ApplicationAdapter {
         }
 
         batch.begin();
-        for (IEntity entity : entities) {
-            entity.render(batch, font, mouse);
+        for (Layer layer : layers) {
+            for (IEntity entity : layer.getEntities()) {
+                entity.render(batch, font, mouse);
+            }
         }
         batch.end();
 
@@ -182,7 +218,15 @@ public class Main extends ApplicationAdapter {
         Vector3 tmp = new Vector3(x, y, 0);
         viewport.unproject(tmp);
         button.setBounds(new Rectangle(tmp.x,tmp.y,width,height));
-        entities.add(button);
+        getLayer(LayerType.Elements).getEntities().add(button);
     }
 
+    public Layer getLayer(LayerType type) {
+        for (Layer layer : layers) {
+            if (layer.getName().equals(type.name())) {
+                return layer;
+            }
+        }
+        return null;
+    }
 }
