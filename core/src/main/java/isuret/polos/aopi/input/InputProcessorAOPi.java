@@ -44,15 +44,15 @@ public class InputProcessorAOPi implements InputProcessor {
         } else if (keycode == Input.Keys.F5) {
             main.selectedMode = Main.Mode.F5_Analyze;
         } else if (keycode == Input.Keys.F6) {
-            main.selectedMode = Main.Mode.F6Broadcast;
+            main.selectedMode = Main.Mode.F6_Broadcast;
         } else if (keycode == Input.Keys.F7) {
-            main.selectedMode = Main.Mode.F7Database;
+            main.selectedMode = Main.Mode.F7_Database;
         } else if (keycode == Input.Keys.F8) {
-            main.selectedMode = Main.Mode.F8RatesTrends;
+            main.selectedMode = Main.Mode.F8_RatesTrends;
         } else if (keycode == Input.Keys.F9) {
-            main.selectedMode = Main.Mode.F9Reports;
+            main.selectedMode = Main.Mode.F9_Reports;
         } else if (keycode == Input.Keys.F10) {
-            main.selectedMode = Main.Mode.F10Settings;
+            main.selectedMode = Main.Mode.F10_Settings;
         } else if (keycode == Input.Keys.F11) {
             if (Gdx.graphics.isFullscreen()) {
                 Gdx.graphics.setWindowedMode(1280, 800);
@@ -61,7 +61,7 @@ public class InputProcessorAOPi implements InputProcessor {
                 Gdx.graphics.setFullscreenMode(mode);
             }
         } else if (keycode == Input.Keys.F12) {
-            main.selectedMode = Main.Mode.F12Debug;
+            main.selectedMode = Main.Mode.F12_Resonance;
         }
 
         if (keycode == Input.Keys.BACKSPACE) {
@@ -127,7 +127,7 @@ public class InputProcessorAOPi implements InputProcessor {
 
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-        if (Main.Mode.F2_DeviceEditor.equals(main.selectedMode) && Main.SubModeEditor.NewDevice.equals(main.selectedSubMode) && button == Input.Buttons.LEFT) {
+        if (Main.Mode.F2_DeviceEditor.equals(main.selectedMode) && Main.SubModeEditor.N_NewDevice.equals(main.selectedSubMode) && button == Input.Buttons.LEFT) {
             main.drawing = true;
             main.touchDownX = main.mouse.x;
             main.touchDownY = main.mouse.y;
@@ -139,9 +139,9 @@ public class InputProcessorAOPi implements InputProcessor {
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
         Vector3 tmp = new Vector3(screenX, screenY, 0);
         main.viewport.unproject(tmp);
-        if (Main.Mode.F2_DeviceEditor.equals(main.selectedMode) && Main.SubModeEditor.NewDevice.equals(main.selectedSubMode) && button == Input.Buttons.LEFT) {
+        if (Main.Mode.F2_DeviceEditor.equals(main.selectedMode) && Main.SubModeEditor.N_NewDevice.equals(main.selectedSubMode) && button == Input.Buttons.LEFT) {
             main.drawing = false;
-            main.selectedSubMode = Main.SubModeEditor.MoveDevice;
+            main.selectedSubMode = Main.SubModeEditor.G_MoveDevice;
             Rectangle rect = ShapeTool.createNormalizedRectangle(main.touchDownX, main.touchDownY, tmp.x, tmp.y);
             Device dev = new Device("Test", "Test", "Test", "Test", "Test", rect);
             main.getLayer(Main.LayerType.Device).getEntities().add(dev);

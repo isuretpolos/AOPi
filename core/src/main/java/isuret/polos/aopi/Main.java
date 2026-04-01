@@ -41,21 +41,20 @@ public class Main extends ApplicationAdapter {
         F2_DeviceEditor,
         F3_Help,
         F4_Case,
-        F5_Analyze,
-        F6Broadcast,
-        F7Database,
-        F8RatesTrends,
-        F9Reports,
-        F10Settings,
-        F11Fullscreen,
-        F12Debug
+        F5_Analyze, // Special analyze screen
+        F6_Broadcast, // Broadcast only mode, no other action allowed. Yet you can always broadcast with one device only
+        F7_Database,
+        F8_RatesTrends,
+        F9_Reports,
+        F10_Settings,
+        F11_Fullscreen,
+        F12_Resonance // Shows realtime resonance
     }
 
     public enum SubModeEditor {
-        NewDevice,
-        MoveDevice,
-        EditDevice,
-        DeleteDevice,
+        N_NewDevice,
+        G_MoveDevice,
+        X_DeleteDevice,
         NewElement,
         MoveElement,
         EditElement,
@@ -87,7 +86,7 @@ public class Main extends ApplicationAdapter {
     @Override
     public void create() {
         selectedMode = Mode.F2_DeviceEditor;
-        selectedSubMode = SubModeEditor.NewDevice;
+        selectedSubMode = SubModeEditor.N_NewDevice;
         batch = new SpriteBatch();
         shapeRenderer = new ShapeRenderer();
 
