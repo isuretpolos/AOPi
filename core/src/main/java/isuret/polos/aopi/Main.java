@@ -103,10 +103,12 @@ public class Main extends ApplicationAdapter {
         layers.add(new Layer(LayerType.Device, 2, true));
         layers.add(new Layer(LayerType.Elements, 3, true));
 
-        /*
         float width = 300;
-        float y = Gdx.graphics.getHeight() - 10;
+        float y = Gdx.graphics.getHeight() - 20;
 
+        addButtonWithImage("ADD BUTTON","icons/pencil.png", 100, y, width, 30, LayerType.Elements);
+
+        /*
         addButton("F12 Debug", 10, y, width, 30); y -= 35;
         addButton("F11 Fullscreen", 10, y, width, 30); y -= 35;
         addButton("F10 Settings", 10, y, width, 30); y -= 35;
@@ -211,13 +213,23 @@ public class Main extends ApplicationAdapter {
         viewport.update(width, height, true);
     }
 
-    private void addButton(String text, float x, float y, float width, float height) {
+    public void addButtonWithImage(String text, String path, float x, float y, float width, float height, LayerType layer) {
+        Button button = addButton(text, x, y, width, height, layer);
+        Texture texture = new Texture(Gdx.files.internal(path));
+        Vector3 tmp = new Vector3(x, y, 0);
+        viewport.unproject(tmp);
+        Image image = new Image(texture, tmp.x,tmp.y);
+        button.setImageOn(image);
+    }
+
+    private Button addButton(String text, float x, float y, float width, float height, LayerType layer) {
         Button button = new Button();
         button.setText(text);
         Vector3 tmp = new Vector3(x, y, 0);
         viewport.unproject(tmp);
         button.setBounds(new Rectangle(tmp.x,tmp.y,width,height));
-        getLayer(LayerType.Elements).getEntities().add(button);
+        getLayer(layer).getEntities().add(button);
+        return button;
     }
 
     public Layer getLayer(LayerType type) {
